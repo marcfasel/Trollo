@@ -1,0 +1,10 @@
+{
+  "name": "Trollo",
+  "version": "0.0.1",
+  "private": "true",
+  "dependencies": {
+  	"socket.io": "*",
+  	"express": "3.x",
+  	"jade": "*"
+    }
+}

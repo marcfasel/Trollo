@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Trollo</title>
+		<script type="text/javascript" src="/public/javascripts/jquery-1.9.1.min.js"></script>
+		<script type="text/javascript" src="/public/javascripts/bootstrap.min.js"></script>
+		<script src="/socket.io/socket.io.js"></script>
+		<script>
+		  var socket = io.connect('http://localhost:8090');
+		  socket.on('get_board', function (board) {
+		    console.log('get_board event received');
+		    console.log(board);
+		    $('#boardlists').empty(); // Start with clean board list
+			for (var i =0;i<board.lists.length;i++)	{
+				var list = board.lists[i];
+				// Create new card
+				console.log('Creating new list with title '+list.title);
+				var newList = $('#sample_list').clone().appendTo('#boardlists');
+				newList.attr('id',list.id);
+				newList.find('#sample_inner_list').attr('id','inner_'+list.id).empty();
+				newList.find('.list_title').text(list.title);
+				for (var j = 0; j<list.cards.length;j++){
+					var card = list.cards[j];
+					// Create new card
+					console.log('Creating new card with title ' + card.title);
+					var newCardPlusSpacer = $('#sample_card_plus_spacer').clone().appendTo('#inner_'+list.id);
+					newCardPlusSpacer.attr('id',card.id);
+					newCardPlusSpacer.find('.card').text(card.title);
+				}
+				newList.find('.add_button').click(function() {
+					// Create new card
+					console.log('Sending create_new_card event to backend');
+					var card = { "id": "card_123", "title": "New card"};
+					var list = $(this).parent();
+					var newCardPlusSpacer = $('#sample_card_plus_spacer').clone().appendTo(list.find(".inner_list"));
+					newCardPlusSpacer.attr('id',card.id);
+					newCardPlusSpacer.find('.card').text(card.title);
+					socket.emit('create_new_card', { "card" : card, "listId" : list.attr('id')});
+				});
+			}
+		  });
+		</script>
+		<style>
+			.list {
+				width:200px;
+				background: rgb(227,227,227);
+				padding: 5px;
+				margin: 5px;
+				float: left;
+			}
+			.lists {
+				background: rgb(28, 80, 110);
+				width: 100%;
+				height: 500px;
+			}
+			.card {
+				background:white;
+				padding: 5px;
+				border: 1px solid grey;
+			}
+			.spacer {
+				height: 10px;
+			}
+			.invisible {
+				display: none;
+			}		
+		</style>
+	</head>
+	<body>
+		<form>
+			<div class="container-fluid">
+				<div class="row-fluid">	
+					<div class="span10">
+						<div class="lists" id="boardlists">
+						</div>
+					</div>
+					<div class="span2" id="userlist">
+						List of users
+					</div>
+			</div>
+		</form>
+		<div class="invisible">
+			<div class="list" id="sample_list">
+				<div class="list_title">List Title</div>
+				<div id="sample_inner_list" class="inner_list">
+				Here is the inner list					
+				</div>
+				<div class="spacer">&nbsp;</div>
+				<div class="add_button btn btn-block">Add a card ...</div>
+			</div>
+			<div id="sample_card_plus_spacer" class="card_plus_spacer">
+				<div class="spacer">&nbsp;</div>
+				<div class="card">Card Title</div>
+			</div>
+		</div>
+	</body>
+</html>
